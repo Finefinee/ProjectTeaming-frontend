@@ -1,18 +1,7 @@
 import React, { useState } from "react";
+import Card from "../components/Card";
 import styled from "styled-components";
 import { FiSend } from "react-icons/fi";
-
-const Card = styled.div`
-  max-width: 410px;
-  margin: 40px auto;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 6px 36px rgba(30,60,120,0.10);
-  padding: 44px 28px 36px 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
 
 const Title = styled.h2`
   color: #7c4dff;
@@ -72,22 +61,26 @@ const Desc = styled.div`
 
 const InvitePage: React.FC = () => {
   const [memberUsername, setMemberUsername] = useState("");
+  const [projectId, setProjectId] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 초대 보내기
   const handleInvite = async () => {
-    if (!memberUsername.trim()) return;
+    if (!memberUsername.trim() || !projectId.trim()) {
+      alert("프로젝트 ID와 초대할 회원 아이디를 모두 입력하세요.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("http://localhost:8080/invites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectMemberUsername: memberUsername, projectId: 1 }), // projectId는 실제 값으로!
+        body: JSON.stringify({ projectMemberUsername: memberUsername, projectId: Number(projectId) }),
         credentials: "include"
       });
       if (!res.ok) throw new Error();
       alert("초대 완료!");
       setMemberUsername("");
+      setProjectId("");
     } catch {
       alert("초대 중 오류가 발생했습니다.");
     } finally {
@@ -102,8 +95,16 @@ const InvitePage: React.FC = () => {
         초대 보내기
       </Title>
       <Desc>
-        팀에 초대할 회원 아이디를 입력하세요.
+        팀에 초대할 회원 아이디와 프로젝트 ID를 입력하세요.
       </Desc>
+      <Input
+        value={projectId}
+        onChange={e => setProjectId(e.target.value)}
+        placeholder="프로젝트 ID"
+        disabled={loading}
+        style={{ marginBottom: 10 }}
+        type="number"
+      />
       <Input
         value={memberUsername}
         onChange={e => setMemberUsername(e.target.value)}
@@ -111,7 +112,9 @@ const InvitePage: React.FC = () => {
         disabled={loading}
         onKeyDown={e => { if (e.key === "Enter") handleInvite(); }}
       />
-      <Button onClick={handleInvite} disabled={loading || !memberUsername.trim()}>
+      <Button
+        onClick={handleInvite}
+        disabled={loading || !memberUsername.trim() || !projectId.trim()}>
         {loading ? "초대 중..." : "초대"}
       </Button>
     </Card>

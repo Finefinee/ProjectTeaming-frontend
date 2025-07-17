@@ -1,18 +1,7 @@
 import React, { useEffect, useState } from "react";
+import Card from "../components/Card";
 import styled from "styled-components";
 import { FiUserPlus, FiUser } from "react-icons/fi";
-
-const Card = styled.div`
-  max-width: 410px;
-  margin: 40px auto;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 6px 36px rgba(30,60,120,0.10);
-  padding: 44px 28px 36px 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
 
 const Title = styled.h2`
   color: #1976d2;
@@ -29,13 +18,12 @@ const List = styled.ul`
   margin: 0 0 28px 0;
   padding: 0;
   list-style: none;
-  min-height: 32px;
 `;
 
 const Item = styled.li`
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 3px;
   background: #f8fafc;
   padding: 13px 18px;
   margin-bottom: 12px;
@@ -45,22 +33,31 @@ const Item = styled.li`
   color: #234;
 `;
 
-const Empty = styled.li`
-  padding: 20px 0;
-  text-align: center;
-  color: #b0b7c8;
-  font-size: 1.07rem;
-  background: none;
-  box-shadow: none;
+const TopRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const UserInfo = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+`;
+
+const SubInfo = styled.div`
+  font-size: 0.96rem;
+  color: #6c86a3;
 `;
 
 const Input = styled.input`
-  padding: 14px 17px;
+  padding: 13px 16px;
   border-radius: 9px;
   border: 1px solid #d0d7e5;
   font-size: 1.07rem;
   width: 100%;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   background: #fafdff;
   outline: none;
   transition: border-color 0.18s;
@@ -93,18 +90,23 @@ const Button = styled.button`
 `;
 
 interface Member {
-  id?: number;
-  name?: string;
-  username?: string;
+  id: number;
+  username: string;
+  name: string;
+  password: string;
+  userId: number;
 }
 
 const MemberPage: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
-  const [newName, setNewName] = useState("");
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [classCode, setClassCode] = useState("");
   const [loading, setLoading] = useState(false);
 
   const fetchMembers = () => {
-    fetch("http://localhost:8080/members")
+    fetch("http://localhost:8080/auth")
       .then(res => res.json())
       .then(setMembers)
       .catch(() => setMembers([]));
@@ -115,16 +117,23 @@ const MemberPage: React.FC = () => {
   }, []);
 
   const handleCreate = async () => {
-    if (!newName.trim()) return;
+    if (!username.trim() || !name.trim() || !password.trim() || !classCode.trim()) return;
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8080/members", {
+      await fetch("http://localhost:8080/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName }),
+        body: JSON.stringify({
+          username,
+          name,
+          password,
+          class_code: parseInt(classCode, 10),
+        }),
       });
-      if (!res.ok) throw new Error();
-      setNewName("");
+      setUsername("");
+      setName("");
+      setPassword("");
+      setClassCode("");
       fetchMembers();
     } catch {
       alert("회원 추가 중 오류가 발생했습니다.");
@@ -141,24 +150,51 @@ const MemberPage: React.FC = () => {
       </Title>
       <List>
         {members.length === 0 ? (
-          <Empty>회원이 없습니다.</Empty>
+          <li style={{ color: "#b0b7c8", textAlign: "center", padding: "18px 0" }}>
+            회원이 없습니다.
+          </li>
         ) : (
-          members.map((m, i) => (
-            <Item key={m.id ?? i}>
-              <FiUserPlus size={18} style={{ color: "#1976d2" }} />
-              {m.name || m.username || JSON.stringify(m)}
+          members.map((m) => (
+            <Item key={m.id}>
+              <TopRow>
+                <UserInfo>
+                  <FiUserPlus size={18} style={{ color: "#1976d2" }} />
+                  {m.name} ({m.username})
+                </UserInfo>
+                {/* 삭제 버튼 등 필요 시 추가 */}
+              </TopRow>
+              <SubInfo>학번: {m.userId}</SubInfo>
             </Item>
           ))
         )}
       </List>
       <Input
-        value={newName}
-        onChange={e => setNewName(e.target.value)}
-        placeholder="새 회원 이름"
+        value={username}
+        onChange={e => setUsername(e.target.value)}
+        placeholder="아이디"
         disabled={loading}
-        onKeyDown={e => { if (e.key === "Enter") handleCreate(); }}
       />
-      <Button onClick={handleCreate} disabled={loading || !newName.trim()}>
+      <Input
+        value={name}
+        onChange={e => setName(e.target.value)}
+        placeholder="이름"
+        disabled={loading}
+      />
+      <Input
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        placeholder="비밀번호"
+        type="password"
+        disabled={loading}
+      />
+      <Input
+        value={classCode}
+        onChange={e => setClassCode(e.target.value)}
+        placeholder="반 (숫자)"
+        type="number"
+        disabled={loading}
+      />
+      <Button onClick={handleCreate} disabled={loading || !username.trim() || !name.trim() || !password.trim() || !classCode.trim()}>
         {loading ? "추가 중..." : "회원 추가"}
       </Button>
     </Card>
