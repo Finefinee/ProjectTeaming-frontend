@@ -303,7 +303,6 @@ const InputIcon = styled.div`
   transform: translateY(-50%);
   color: #6b7280;
   pointer-events: none;
-  margin-top: 12px;
 `;
 
 const Button = styled.button`
