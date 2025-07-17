@@ -1,76 +1,120 @@
-
-
 import React, { useState } from "react";
+import styled from "styled-components";
+import { FiSend } from "react-icons/fi";
+
+const Card = styled.div`
+  max-width: 410px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 6px 36px rgba(30,60,120,0.10);
+  padding: 44px 28px 36px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Title = styled.h2`
+  color: #7c4dff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const Input = styled.input`
+  padding: 14px 17px;
+  border-radius: 9px;
+  border: 1px solid #d0d7e5;
+  font-size: 1.07rem;
+  width: 100%;
+  margin-bottom: 18px;
+  background: #fafdff;
+  outline: none;
+  transition: border-color 0.18s;
+  &:focus {
+    border-color: #7c4dff;
+  }
+`;
+
+const Button = styled.button`
+  background: linear-gradient(90deg, #7c4dff 0%, #536dfe 100%);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 13px 0;
+  width: 100%;
+  font-size: 1.13rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(100,60,255,0.08);
+  transition: background 0.14s, transform 0.1s;
+  &:hover:not(:disabled) {
+    background: linear-gradient(90deg, #536dfe 0%, #7c4dff 100%);
+    transform: translateY(-2px) scale(1.01);
+  }
+  &:disabled {
+    background: #c9bbf7;
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+`;
+
+const Desc = styled.div`
+  color: #7c4dff;
+  font-size: 1rem;
+  margin-bottom: 18px;
+  text-align: center;
+  opacity: 0.8;
+`;
 
 const InvitePage: React.FC = () => {
   const [memberUsername, setMemberUsername] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // 초대 보내기
-  const handleInvite = () => {
+  const handleInvite = async () => {
     if (!memberUsername.trim()) return;
-    fetch("http://localhost:8080/invite", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ projectMemberUsername: memberUsername }),
-      credentials: "include"
-    }).then(() => {
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:8080/invites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectMemberUsername: memberUsername, projectId: 1 }), // projectId는 실제 값으로!
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error();
       alert("초대 완료!");
       setMemberUsername("");
-    });
+    } catch {
+      alert("초대 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div
-      style={{
-        maxWidth: "900px",
-        padding: "40px 80px",
-        margin: "40px auto",
-        borderRadius: "12px",
-        boxShadow: "0 4px 16px rgba(0,0,0,0.07)",
-        background: "#fff",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center"
-      }}
-    >
-      <h2
-        style={{
-          marginBottom: "32px",
-          color: "#0d47a1"
-        }}
-      >
+    <Card>
+      <Title>
+        <FiSend size={25} />
         초대 보내기
-      </h2>
-      <input
+      </Title>
+      <Desc>
+        팀에 초대할 회원 아이디를 입력하세요.
+      </Desc>
+      <Input
         value={memberUsername}
         onChange={e => setMemberUsername(e.target.value)}
         placeholder="초대할 회원 아이디"
-        style={{
-          padding: "10px 16px",
-          borderRadius: "6px",
-          border: "1px solid #ddd",
-          fontSize: "16px",
-          width: "100%",
-          marginBottom: "20px"
-        }}
+        disabled={loading}
+        onKeyDown={e => { if (e.key === "Enter") handleInvite(); }}
       />
-      <button
-        onClick={handleInvite}
-        style={{
-          background: "#1976d2",
-          color: "white",
-          border: "none",
-          borderRadius: "6px",
-          padding: "10px 30px",
-          fontSize: "16px",
-          cursor: "pointer",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          transition: "background 0.2s"
-        }}
-      >
-        초대
-      </button>
-    </div>
+      <Button onClick={handleInvite} disabled={loading || !memberUsername.trim()}>
+        {loading ? "초대 중..." : "초대"}
+      </Button>
+    </Card>
   );
 };
 

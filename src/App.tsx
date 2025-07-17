@@ -1,97 +1,57 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
-import MemberPage from './pages/MemberPage'
-import ProjectPage from './pages/ProjectPage'
-import InvitePage from './pages/InvitePage'
+import React from "react";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import MemberPage from "./pages/MemberPage";
+import ProjectPage from "./pages/ProjectPage";
+import InvitePage from "./pages/InvitePage";
+import styled, { createGlobalStyle } from "styled-components";
 
-function App() {
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#222",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "stretch",
-        justifyContent: "center",
-        width: "100vw"
-      }}
-    >
-      <BrowserRouter>
-        <nav
-          style={{
-            display: 'flex',
-            gap: '24px',
-            justifyContent: 'center',
-            alignItems: 'center',
-            margin: '36px 0',
-            padding: '18px 0',
-            background: '#f5f7fb',
-            borderRadius: '14px',
-            boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
-          }}
-        >
-          <Link
-            to="/members"
-            style={{
-              fontSize: '18px',
-              color: '#0d47a1',
-              textDecoration: 'none',
-              fontWeight: 600,
-              padding: '6px 18px',
-              borderRadius: '8px',
-              transition: 'background 0.2s',
-            }}
-          >
-            회원
-          </Link>
-          <Link
-            to="/projects"
-            style={{
-              fontSize: '18px',
-              color: '#1976d2',
-              textDecoration: 'none',
-              fontWeight: 600,
-              padding: '6px 18px',
-              borderRadius: '8px',
-              transition: 'background 0.2s',
-            }}
-          >
-            프로젝트
-          </Link>
-          <Link
-            to="/invite"
-            style={{
-              fontSize: '18px',
-              color: '#42a5f5',
-              textDecoration: 'none',
-              fontWeight: 600,
-              padding: '6px 18px',
-              borderRadius: '8px',
-              transition: 'background 0.2s',
-            }}
-          >
-            초대
-          </Link>
-        </nav>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "calc(100vh - 140px)",
-            width: "100vw"
-          }}
-        >
-          <Routes>
-            <Route path="/members" element={<MemberPage />} />
-            <Route path="/projects" element={<ProjectPage />} />
-            <Route path="/invite" element={<InvitePage />} />
-          </Routes>
-        </div>
-      </BrowserRouter>
-    </div>
-  )
-}
+const GlobalStyle = createGlobalStyle`
+  body {
+    background: linear-gradient(135deg, #e3ecfc 0%, #f6f9ff 100%);
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', Arial, sans-serif;
+  }
+`;
 
-export default App
+const Nav = styled.nav`
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 38px auto;
+  padding: 28px 0 0 0;
+`;
+
+const NavLink = styled(Link)`
+  color: #1a237e;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.15rem;
+  padding: 7px 24px;
+  border-radius: 8px;
+  transition: background 0.16s, color 0.16s;
+  &:hover {
+    background: #e3e8fd;
+    color: #1565c0;
+  }
+`;
+
+const App: React.FC = () => (
+  <BrowserRouter>
+    <GlobalStyle />
+    <Nav>
+      <NavLink to="/projects">프로젝트</NavLink>
+      <NavLink to="/members">회원</NavLink>
+      <NavLink to="/invites">초대</NavLink>
+    </Nav>
+    <Routes>
+      <Route path="/projects" element={<ProjectPage />} />
+      <Route path="/members" element={<MemberPage />} />
+      <Route path="/invites" element={<InvitePage />} />
+      <Route path="*" element={<ProjectPage />} />
+    </Routes>
+  </BrowserRouter>
+);
+
+export default App;
